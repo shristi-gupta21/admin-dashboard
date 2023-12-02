@@ -13,12 +13,15 @@ export const Dashboard = () => {
       const result = await response.json();
       setData(result);
     };
-
     fetchData();
   }, []);
   const pageSize = 10;
   const [data, setData] = useState([]);
   const [masterCheckboxChecked, setMasterCheckboxChecked] = useState(false);
+  const [checkboxCheckedIndexArray, setCheckboxCheckedIndexArray] = useState(
+    []
+  );
+  const [checkboxCheckedIndex, setCheckboxCheckedIndex] = useState("");
   const [filteredData, setFilteredData] = useState(data);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,9 +29,22 @@ export const Dashboard = () => {
     setMasterCheckboxChecked(!masterCheckboxChecked);
   };
 
-  const handleCheckboxChange = (index, isChecked) => {
+  const handleCheckboxChange = (index, isChecked, id) => {
     const checkboxStates = Array(46).fill(masterCheckboxChecked);
     checkboxStates[index] = isChecked;
+    setCheckboxCheckedIndexArray((prev) => [...prev, id]);
+    setCheckboxCheckedIndex(id)
+  };
+
+  const clickMasterDelete = () => {
+    let newDataArray = data.filter(
+      (item) => !checkboxCheckedIndexArray.includes(item.id)
+    );
+    setData(newDataArray);
+  };
+  const clickDelete = () => {
+    let newDataArray = data.filter(item => item.id !== checkboxCheckedIndex);
+    setData(newDataArray);
   };
 
   const handleSearch = (e) => {
@@ -36,7 +52,6 @@ export const Dashboard = () => {
     if (e.target.value.trim() === "") {
       setFilteredData(data);
     } else {
-      // Filter the data based on the search query
       const filteredResults = data.filter((item) =>
         Object.values(item).some(
           (value) =>
@@ -63,15 +78,20 @@ export const Dashboard = () => {
             <input
               type="checkbox"
               checked={masterCheckboxChecked}
-              onChange={(e) => handleCheckboxChange(index, e.target.checked)}
+              onChange={(e) =>
+                handleCheckboxChange(index, e.target.checked, item.id)
+              }
             />
           ) : (
             <input
               type="checkbox"
-              onChange={(e) => handleCheckboxChange(index, e.target.checked)}
+              onChange={(e) =>
+                handleCheckboxChange(index, e.target.checked, item.id)
+              }
             />
           )}
         </td>
+        <td>{item.id}</td>
         <td>{item.name}</td>
         <td>{item.email}</td>
         <td>{item.role}</td>
@@ -79,7 +99,10 @@ export const Dashboard = () => {
           <button className="p-1 hover:bg-slate-200 rounded hover:text-slate-700">
             <ModeEditIcon />
           </button>
-          <button className="p-1 hover:bg-slate-200 rounded hover:text-slate-700">
+          <button
+            onClick={clickDelete}
+            className="p-1 hover:bg-slate-200 rounded hover:text-slate-700"
+          >
             <DeleteOutlineIcon />
           </button>
         </td>
@@ -105,7 +128,10 @@ export const Dashboard = () => {
             <SearchIcon />
           </button>
         </div>
-        <button className="text-red-500 border py-1 px-2 rounded hover:bg-slate-200">
+        <button
+          onClick={clickMasterDelete}
+          className="text-red-500 border py-1 px-2 rounded hover:bg-slate-200"
+        >
           <DeleteIcon />
         </button>
       </div>
@@ -138,14 +164,23 @@ export const Dashboard = () => {
                           type="checkbox"
                           checked={masterCheckboxChecked}
                           onChange={(e) =>
-                            handleCheckboxChange(index, e.target.checked)
+                            handleCheckboxChange(
+                              index,
+                              e.target.checked,
+                              item.id
+                            )
                           }
                         />
                       ) : (
                         <input
                           type="checkbox"
+                          checked={checkboxCheckedIndexArray}
                           onChange={(e) =>
-                            handleCheckboxChange(index, e.target.checked)
+                            handleCheckboxChange(
+                              index,
+                              e.target.checked,
+                              item.id
+                            )
                           }
                         />
                       )}
@@ -154,8 +189,12 @@ export const Dashboard = () => {
                     <td>{item.email}</td>
                     <td>{item.role}</td>
                     <td className="flex gap-4">
-                      <button className=" p-1 border"> Edit</button>
-                      <button className=" p-1 border">Delete</button>
+                      <button className=" p-1 border">
+                        <ModeEditIcon />
+                      </button>
+                      <button onClick={clickDelete} className=" p-1 border">
+                        <DeleteOutlineIcon />
+                      </button>
                     </td>
                   </tr>
                 ))}
