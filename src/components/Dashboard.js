@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 export const Dashboard = () => {
   const [data, setData] = useState([]);
-
+  const [masterCheckboxChecked, setMasterCheckboxChecked] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(
@@ -14,10 +14,16 @@ export const Dashboard = () => {
 
     fetchData();
   }, []);
+  
+  const handleMasterCheckboxChange = () => {
+    setMasterCheckboxChecked(!masterCheckboxChecked);
+  };
 
-  let selectedRows = [];
-  let isSelectAllChecked = false;
- console.log(data)
+  const handleCheckboxChange = (index, isChecked) => {
+    const checkboxStates = Array(46).fill(masterCheckboxChecked);
+    checkboxStates[index] = isChecked;
+  };
+
   return (
     <div className="w-full my-10">
       <input type="search" />
@@ -28,7 +34,8 @@ export const Dashboard = () => {
               <input
                 type="checkbox"
                 id="main-checkbox"
-                checked={isSelectAllChecked}
+                checked={masterCheckboxChecked}
+                onChange={handleMasterCheckboxChange}
               />
             </th>
             <th>Name</th>
@@ -38,13 +45,25 @@ export const Dashboard = () => {
           </tr>
         </thead>
         <tbody>
-          {data.map((item) => (
+          {data.map((item, index) => (
             <tr className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2">
               <td id={"checkbox-" + item.id} className="text-center">
-                <input
-                  type="checkbox"
-                  checked={selectedRows.includes(item.id)}
-                />
+                {masterCheckboxChecked ? (
+                  <input
+                    type="checkbox"
+                    checked={masterCheckboxChecked}
+                    onChange={(e) =>
+                      handleCheckboxChange(index, e.target.checked)
+                    }
+                  />
+                ) : (
+                  <input
+                    type="checkbox"
+                    onChange={(e) =>
+                      handleCheckboxChange(index, e.target.checked)
+                    }
+                  />
+                )}
               </td>
               <td>{item.name}</td>
               <td>{item.email}</td>
