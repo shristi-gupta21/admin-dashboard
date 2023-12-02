@@ -1,1 +1,48 @@
-<div>demo</div>
+---
+const arr = await fetch(
+  "https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json"
+)
+  .then((response) => response.json())
+  .then((data) => {
+    return data;
+  });
+---
+
+<div class="my-10">
+  <input type="search" />
+  <table
+    class="p-2 text-left max-w-6xl mx-auto table-auto w-full border-collapse border border-slate-400"
+  >
+    <thead>
+      <tr
+        class="[&>th]:border-r [&>th]:border-slate-400 [&>th]:py-1 [&>th]:px-2"
+      >
+        <th class="text-center">
+          <input type="checkbox" />
+        </th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        arr.map((item) => (
+          <tr class="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2">
+            <td class="text-center">
+              <input type="checkbox" />
+            </td>
+            <td>{item.name}</td>
+            <td>{item.email}</td>
+            <td>{item.role}</td>
+            <td class="flex gap-4">
+              <button class=" p-1 border"> Edit</button>
+              <button class=" p-1 border">Delete</button>
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
