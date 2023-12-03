@@ -41,10 +41,17 @@ export const Dashboard = () => {
       (item) => !checkboxCheckedIndexArray.includes(item.id)
     );
     setData(newDataArray);
+    if(filteredData.length > 0){
+      setFilteredData(newDataArray)
+    }
   };
   const clickDelete = () => {
     let newDataArray = data.filter(item => item.id !== checkboxCheckedIndex);
+    console.log(newDataArray)
     setData(newDataArray);
+    if(filteredData.length > 0){
+      setFilteredData(newDataArray)
+    }
   };
 
   const handleSearch = (e) => {
@@ -74,7 +81,9 @@ export const Dashboard = () => {
   for(let i=1; i <= totalPages;i++ ){
     pagesArr.push(i);
   }
+  let keysArray = [];
   const renderTableRows = () => {
+    keysArray = Object.getOwnPropertyNames(data ? "":data[0]);
     const startIdx = (currentPage - 1) * pageSize;
     const endIdx = startIdx + pageSize;
     return data.slice(startIdx, endIdx).map((item, index) => (
@@ -115,6 +124,9 @@ export const Dashboard = () => {
       </tr>
     ));
   };
+
+ 
+  
   return (
     <div className="w-full my-10  max-w-6xl mx-auto px-4 md:px-0">
       <div className="flex justify-between">
@@ -153,7 +165,7 @@ export const Dashboard = () => {
                   onChange={handleMasterCheckboxChange}
                 />
               </th>
-              <th>Name</th>
+              <th>{keysArray[0]}</th>
               <th>Email</th>
               <th>Role</th>
               <th>Actions</th>
@@ -180,7 +192,6 @@ export const Dashboard = () => {
                       ) : (
                         <input
                           type="checkbox"
-                          checked={checkboxCheckedIndexArray}
                           onChange={(e) =>
                             handleCheckboxChange(
                               index,
