@@ -25,6 +25,7 @@ export const Dashboard = () => {
   const [filteredData, setFilteredData] = useState(data);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [bgColour, setBgColour] = useState("bg-white");
   const startIdx = (currentPage - 1) * pageSize;
   const endIdx = startIdx + pageSize;
 
@@ -32,6 +33,11 @@ export const Dashboard = () => {
     const array = [];
     for (let i = startIdx; i <= endIdx; i++) {
       array.push(data[i].id);
+    }
+    if (array.length > 0) {
+      setBgColour("bg-gray-200");
+    } else {
+      setBgColour("bg-white");
     }
     setCheckboxCheckedIndexArray(array);
     setMasterCheckboxChecked(!masterCheckboxChecked);
@@ -47,6 +53,11 @@ export const Dashboard = () => {
       masterCheckboxChecked
     );
     checkboxStates[index] = isChecked;
+    if (isChecked) {
+      setBgColour("bg-gray-200");
+    } else {
+      setBgColour("bg-white");
+    }
     setCheckboxCheckedIndexArray((prev) => [...prev, id]);
     setCheckboxCheckedIndex(id);
   };
@@ -57,14 +68,12 @@ export const Dashboard = () => {
     );
     setMasterCheckboxChecked(false);
     setData(newDataArray);
-    console.log(newDataArray);
     if (filteredData.length > 0) {
       setFilteredData(newDataArray);
     }
   };
   const clickDelete = () => {
     let newDataArray = data.filter((item) => item.id !== checkboxCheckedIndex);
-    // console.log(newDataArray);
     setData(newDataArray);
     if (filteredData.length > 0) {
       setFilteredData(newDataArray);
@@ -105,14 +114,24 @@ export const Dashboard = () => {
   if (data.length > 0) {
     keysArray = Object.getOwnPropertyNames(data[0]);
   }
-  console.log(keysArray);
+//   console.log(checkboxCheckedIndexArray.map((id) =>
+//   id === data[0].id ? bgColour : "bg-white"
+// ))
   const renderTableRows = () => {
     return data.slice(startIdx, endIdx).map((item, index) => (
       <tr
         key={item.id}
-        className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2"
+        className={`${
+          masterCheckboxChecked
+            ? checkboxCheckedIndexArray.map((id) =>
+                id === item.id ? bgColour : " bg-white "
+              )
+            : checkboxCheckedIndex === item.id
+            ? bgColour
+            : " bg-white "
+        } [&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2`}
       >
-        <td id={"checkbox-" + item.id} className="text-center">
+        <td className="text-center">
           {masterCheckboxChecked ? (
             <input
               type="checkbox"
@@ -135,12 +154,12 @@ export const Dashboard = () => {
         <td>{item.email}</td>
         <td>{item.role}</td>
         <td className="flex gap-4">
-          <button className="p-1 hover:bg-slate-200 rounded hover:text-slate-700">
+          <button className="edit p-1 hover:bg-slate-200 rounded hover:text-slate-700">
             <ModeEditIcon />
           </button>
           <button
             onClick={clickDelete}
-            className="p-1 hover:bg-slate-200 rounded hover:text-slate-700"
+            className="delete p-1 hover:bg-slate-200 rounded hover:text-slate-700"
           >
             <DeleteOutlineIcon />
           </button>
@@ -158,7 +177,7 @@ export const Dashboard = () => {
             value={searchQuery}
             onChange={handleSearch}
             className="border rounded py-2 px-4"
-            placeholder="Search by id"
+            placeholder="Search"
             onKeyPress={handleKeyPress}
           />
           <button
@@ -170,7 +189,7 @@ export const Dashboard = () => {
         </div>
         <button
           onClick={clickMasterDelete}
-          className="text-red-500 border py-1 px-2 rounded hover:bg-slate-200"
+          className="delete text-red-500 border py-1 px-2 rounded hover:bg-slate-200"
         >
           <DeleteIcon />
         </button>
@@ -182,19 +201,20 @@ export const Dashboard = () => {
               <th className="text-center">
                 <input
                   type="checkbox"
-                  id="main-checkbox"
                   checked={masterCheckboxChecked}
                   onChange={handleMasterCheckboxChange}
                 />
               </th>
               {keysArray.map((item) =>
                 item === "id" ? (
-                  <th className="text-center">{item}</th>
+                  <th key={item} className="text-center">
+                    {item}
+                  </th>
                 ) : (
-                  <th>{item}</th>
+                  <th key={item}>{item}</th>
                 )
               )}
-               <th>actions</th>
+              <th>actions</th>
             </tr>
           </thead>
           <tbody>
@@ -205,7 +225,7 @@ export const Dashboard = () => {
                     key={item.id}
                     className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2"
                   >
-                    <td id={"checkbox-" + item.id} className="text-center">
+                    <td className="text-center">
                       {masterCheckboxChecked ? (
                         <input
                           type="checkbox"
@@ -236,10 +256,13 @@ export const Dashboard = () => {
                     <td>{item.email}</td>
                     <td>{item.role}</td>
                     <td className="flex gap-4">
-                      <button className=" p-1 border">
+                      <button className="edit p-1 border">
                         <ModeEditIcon />
                       </button>
-                      <button onClick={clickDelete} className=" p-1 border">
+                      <button
+                        onClick={clickDelete}
+                        className="delete p-1 border"
+                      >
                         <DeleteOutlineIcon />
                       </button>
                     </td>
@@ -248,10 +271,42 @@ export const Dashboard = () => {
           </tbody>
         </table>
       </div>
+      <div className="flex justify-between md:hidden pt-4">
+        <button
+          onClick={() => onPageChange(1)}
+          className="first-page border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          disabled={currentPage === 1}
+        >
+          First Page
+        </button>
+        <button
+          onClick={() => onPageChange(totalPages)}
+          className="last-page border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          disabled={currentPage === totalPages}
+        >
+          Last Page
+        </button>
+      </div>
       <div className="pt-4 flex w-full justify-between">
+        <div className="md:flex gap-2 hidden">
+          <button
+            onClick={() => onPageChange(1)}
+            className="first-page border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+            disabled={currentPage === 1}
+          >
+            First Page
+          </button>
+          <button
+            onClick={() => onPageChange(totalPages)}
+            className="last-page border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+            disabled={currentPage === totalPages}
+          >
+            Last Page
+          </button>
+        </div>
         <button
           onClick={() => onPageChange(currentPage - 1)}
-          className="border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          className="previous-page border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
           disabled={currentPage === 1}
         >
           Previous
@@ -271,7 +326,7 @@ export const Dashboard = () => {
         <span className="text-sm md:text-base">{`Page ${currentPage} of ${totalPages}`}</span>
         <button
           onClick={() => onPageChange(currentPage + 1)}
-          className="border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          className="next-page border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
           disabled={currentPage === totalPages}
         >
           Next
