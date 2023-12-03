@@ -62,18 +62,24 @@ export const Dashboard = () => {
       setFilteredData(filteredResults);
     }
   };
+
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       handleSearch();
     }
   };
+
   const totalPages = Math.ceil(data.length / pageSize);
+  const pagesArr =[];
+  for(let i=1; i <= totalPages;i++ ){
+    pagesArr.push(i);
+  }
   const renderTableRows = () => {
     const startIdx = (currentPage - 1) * pageSize;
     const endIdx = startIdx + pageSize;
     return data.slice(startIdx, endIdx).map((item, index) => (
-      <tr className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2">
-        <td key={item.id} id={"checkbox-" + item.id} className="text-center">
+      <tr key={item.id} className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2">
+        <td  id={"checkbox-" + item.id} className="text-center">
           {masterCheckboxChecked ? (
             <input
               type="checkbox"
@@ -157,7 +163,7 @@ export const Dashboard = () => {
             {filteredData.length < 1
               ? renderTableRows()
               : filteredData.map((item, index) => (
-                  <tr className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2">
+                  <tr key={item.id} className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2">
                     <td id={"checkbox-" + item.id} className="text-center">
                       {masterCheckboxChecked ? (
                         <input
@@ -210,10 +216,10 @@ export const Dashboard = () => {
           Previous
         </button>
         <div>
-          {[1, 2, 3, 4, 5].map((page) => (
+          {pagesArr.map((page) => (
             <button
               key={page}
-              className=" mx-0.5 md:mx-1 text-xs md:text-base h-5 w-5 md:h-8 md:w-8 rounded-full bg-blue-300 disabled:bg-yellow-200 disabled:text-gray-600 font-medium"
+              className=" mx-0.5 md:mx-1 text-xs md:text-sm scale-110 disabled:text-base disabled:scale-100 h-5 w-5 md:h-8 md:w-8 rounded-full bg-blue-300 disabled:bg-yellow-200 disabled:text-gray-600 font-medium"
               onClick={() => setCurrentPage(page)}
               disabled={currentPage === page}
             >
