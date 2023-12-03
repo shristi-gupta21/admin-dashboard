@@ -25,47 +25,66 @@ export const Dashboard = () => {
   const [filteredData, setFilteredData] = useState(data);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const startIdx = (currentPage - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+
   const handleMasterCheckboxChange = () => {
+    const array = [];
+    for (let i = startIdx; i <= endIdx; i++) {
+      array.push(data[i].id);
+    }
+    setCheckboxCheckedIndexArray(array);
     setMasterCheckboxChecked(!masterCheckboxChecked);
   };
 
+  const onPageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    setMasterCheckboxChecked(false);
+  };
+
   const handleCheckboxChange = (index, isChecked, id) => {
-    const checkboxStates = Array(46).fill(masterCheckboxChecked);
+    const checkboxStates = Array(data.slice(startIdx, endIdx)).fill(
+      masterCheckboxChecked
+    );
     checkboxStates[index] = isChecked;
     setCheckboxCheckedIndexArray((prev) => [...prev, id]);
-    setCheckboxCheckedIndex(id)
+    setCheckboxCheckedIndex(id);
   };
 
   const clickMasterDelete = () => {
     let newDataArray = data.filter(
       (item) => !checkboxCheckedIndexArray.includes(item.id)
     );
+    setMasterCheckboxChecked(false);
     setData(newDataArray);
-    if(filteredData.length > 0){
-      setFilteredData(newDataArray)
+    console.log(newDataArray);
+    if (filteredData.length > 0) {
+      setFilteredData(newDataArray);
     }
   };
   const clickDelete = () => {
-    let newDataArray = data.filter(item => item.id !== checkboxCheckedIndex);
-    console.log(newDataArray)
+    let newDataArray = data.filter((item) => item.id !== checkboxCheckedIndex);
+    // console.log(newDataArray);
     setData(newDataArray);
-    if(filteredData.length > 0){
-      setFilteredData(newDataArray)
+    if (filteredData.length > 0) {
+      setFilteredData(newDataArray);
     }
   };
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
     if (e.target.value.trim() === "") {
-      setFilteredData(data);
+      setFilteredData(data.slice(startIdx, endIdx));
     } else {
-      const filteredResults = data.filter((item) =>
-        Object.values(item).some(
-          (value) =>
-            typeof value === "string" &&
-            value.toLowerCase().includes(e.target.value)
-        )
-      );
+      const filteredResults = data
+        .slice(startIdx, endIdx)
+        .filter((item) =>
+          Object.values(item).some(
+            (value) =>
+              typeof value === "string" &&
+              value.toLowerCase().includes(e.target.value)
+          )
+        );
       setFilteredData(filteredResults);
     }
   };
@@ -77,18 +96,23 @@ export const Dashboard = () => {
   };
 
   const totalPages = Math.ceil(data.length / pageSize);
-  const pagesArr =[];
-  for(let i=1; i <= totalPages;i++ ){
+  const pagesArr = [];
+
+  for (let i = 1; i <= totalPages; i++) {
     pagesArr.push(i);
   }
   let keysArray = [];
+  if (data.length > 0) {
+    keysArray = Object.getOwnPropertyNames(data[0]);
+  }
+  console.log(keysArray);
   const renderTableRows = () => {
-    keysArray = Object.getOwnPropertyNames(data ? "":data[0]);
-    const startIdx = (currentPage - 1) * pageSize;
-    const endIdx = startIdx + pageSize;
     return data.slice(startIdx, endIdx).map((item, index) => (
-      <tr key={item.id} className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2">
-        <td  id={"checkbox-" + item.id} className="text-center">
+      <tr
+        key={item.id}
+        className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2"
+      >
+        <td id={"checkbox-" + item.id} className="text-center">
           {masterCheckboxChecked ? (
             <input
               type="checkbox"
@@ -106,7 +130,7 @@ export const Dashboard = () => {
             />
           )}
         </td>
-        <td>{item.id}</td>
+        <td className="text-center">{item.id}</td>
         <td>{item.name}</td>
         <td>{item.email}</td>
         <td>{item.role}</td>
@@ -125,8 +149,6 @@ export const Dashboard = () => {
     ));
   };
 
- 
-  
   return (
     <div className="w-full my-10  max-w-6xl mx-auto px-4 md:px-0">
       <div className="flex justify-between">
@@ -156,7 +178,7 @@ export const Dashboard = () => {
       <div className="overflow-x-auto w-full">
         <table className="p-2 mt-4 text-left table-auto w-full border-collapse border border-slate-400">
           <thead>
-            <tr className="[&>th]:border-r [&>th]:border-slate-400 [&>th]:py-1 [&>th]:px-2 border-b border-slate-400">
+            <tr className="capitalize [&>th]:border-r [&>th]:border-slate-400 [&>th]:py-1 [&>th]:px-2 border-b border-slate-400">
               <th className="text-center">
                 <input
                   type="checkbox"
@@ -165,17 +187,24 @@ export const Dashboard = () => {
                   onChange={handleMasterCheckboxChange}
                 />
               </th>
-              <th>{keysArray[0]}</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Actions</th>
+              {keysArray.map((item) =>
+                item === "id" ? (
+                  <th className="text-center">{item}</th>
+                ) : (
+                  <th>{item}</th>
+                )
+              )}
+               <th>actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredData.length < 1
               ? renderTableRows()
               : filteredData.map((item, index) => (
-                  <tr key={item.id} className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2">
+                  <tr
+                    key={item.id}
+                    className="[&>td]:border-r [&>td]:border-slate-400 [&>td]:py-1 [&>td]:px-2"
+                  >
                     <td id={"checkbox-" + item.id} className="text-center">
                       {masterCheckboxChecked ? (
                         <input
@@ -202,6 +231,7 @@ export const Dashboard = () => {
                         />
                       )}
                     </td>
+                    <td>{item.id}</td>
                     <td>{item.name}</td>
                     <td>{item.email}</td>
                     <td>{item.role}</td>
@@ -220,7 +250,7 @@ export const Dashboard = () => {
       </div>
       <div className="pt-4 flex w-full justify-between">
         <button
-          onClick={() => setCurrentPage(currentPage - 1)}
+          onClick={() => onPageChange(currentPage - 1)}
           className="border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
           disabled={currentPage === 1}
         >
@@ -240,7 +270,7 @@ export const Dashboard = () => {
         </div>
         <span className="text-sm md:text-base">{`Page ${currentPage} of ${totalPages}`}</span>
         <button
-          onClick={() => setCurrentPage(currentPage + 1)}
+          onClick={() => onPageChange(currentPage + 1)}
           className="border text-sm md:text-base px-2 md:px-4 py-1 rounded bg-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
           disabled={currentPage === totalPages}
         >
